@@ -4,7 +4,7 @@ RewriteEngine On
 RewriteRule ^data/batch$ batch.php [END]
 
 # Show a visible diagnostic page when the asset volume is empty.
-RewriteCond %{ENV:MIRROR_AVAILABLE} !=1
+RewriteCond /mirror/index.html !-f
 RewriteRule ^$ missing-mirror.html [END]
 
 # Use the game's original entry point for the site root.
