@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Keep the original public API path used by the frontend.
+RewriteRule ^data/batch$ batch.php [END]
+
+# Show a visible diagnostic page when the asset volume is empty.
+RewriteCond %{ENV:MIRROR_AVAILABLE} !=1
+RewriteRule ^$ missing-mirror.html [END]
+
+# Use the game's original entry point for the site root.
+RewriteRule ^$ /_assets/index.html [END,PT]
+
+# Use the game's original entry point from the mounted mirror.
+RewriteRule ^index\.html$ /_assets/index.html [END,PT]
+
+# Serve the large asset tree without copying it into the image.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ /_assets/$1 [PT,L]

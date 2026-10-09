@@ -1,0 +1,12 @@
+name: playgta5-web-rewritten
+
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - "127.0.0.1:8081:80"
+    volumes:
+      - "./public:/var/www/html/public:ro"
+      - "./mirror/playgta5.com:/mirror:ro"
+    restart: unless-stopped

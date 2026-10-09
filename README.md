@@ -1,49 +1,45 @@
-# Play GTA 5 — execução local
+# playgta5-web-rewritten — local execution
 
-Este projeto executa uma versão web do jogo em um container Docker. Apache
-serve os arquivos estáticos e PHP implementa o endpoint de leitura necessário
-pelo frontend.
+This project runs a web version of the game inside a Docker container. Apache
+serves the static files, and PHP implements the read endpoint required by the
+frontend.
 
-Os procedimentos abaixo são os mesmos no Windows, Linux e macOS. Você só
-precisa ter Docker instalado e executar os comandos a partir da pasta deste
-projeto.
+The procedures below are the same on Windows, Linux, and macOS. You only need
+Docker installed and must run the commands from this project's directory.
 
-## Aviso sobre os assets
+## Assets notice
 
-A pasta `mirror/playgta5.com` não é distribuída neste projeto. Ela pode conter
-arquivos protegidos por direitos autorais, e não sou o responsável por esse
-conteúdo: apenas utilizei os arquivos que estavam disponíveis para fazer esta
-reescrita. Não conheço a procedência ou o conteúdo detalhado de cada arquivo;
-sei apenas que os arquivos presentes funcionam com esta implementação.
+The `mirror/playgta5.com` directory is not distributed with this project. It
+may contain copyrighted files, and I am not responsible for that content: I
+only used the files that were available to create this rewrite. I do not know
+the origin or the detailed contents of every file; I only know that the files
+present work with this implementation.
 
-Obtenha os assets por sua própria conta e responsabilidade, de uma fonte que
-você tenha autorização para usar. Não solicite, redistribua ou inclua essa
-pasta em cópias públicas deste projeto. Consulte [`docs/ASSETS.md`](./docs/ASSETS.md)
-para identificação e verificação.
+Obtain the assets at your own responsibility from a source you are authorized
+to use. Do not request, redistribute, or include this directory in public
+copies of this project. See [`docs/ASSETS.md`](./docs/ASSETS.md) for
+identification and verification.
 
-## Pré-requisitos
+## Requirements
 
-- Docker Desktop no Windows/macOS ou Docker Engine no Linux;
-- Docker Compose v2, normalmente disponível como `docker compose`;
-- os assets colocados em `mirror/playgta5.com/`;
-- porta `8081` disponível no computador.
+- Docker Desktop on Windows/macOS or Docker Engine on Linux;
+- Docker Compose v2, usually available as `docker compose`;
+- the assets placed in `mirror/playgta5.com/`;
+- port `8081` available on the computer.
 
-Verifique a instalação com:
+Verify the installation with:
 
 ```text
 docker --version
 docker compose version
 ```
 
-Se esses dois comandos funcionarem, não é necessário instalar PHP, Apache,
-Python, Node.js ou qualquer outra dependência no computador host.
+If the assets are not mounted, the container still starts and serves a visible
+`missing-mirror.html` diagnostic page at the root URL.
 
-Se os assets não estiverem montados, o container encerra com uma mensagem de
-erro em vez de iniciar um servidor vazio.
+## Required structure
 
-## Estrutura necessária
-
-Antes de iniciar, a pasta deve estar assim:
+Before starting, the directory should look like this:
 
 ```text
 rewritten/
@@ -56,78 +52,79 @@ rewritten/
         └── data/
 ```
 
-O conteúdo de `mirror/playgta5.com/` não faz parte deste repositório e precisa
-ser obtido separadamente.
+The contents of `mirror/playgta5.com/` are not part of this repository and
+must be obtained separately.
 
-## Iniciar
+## Start
 
-Abra qualquer terminal — PowerShell, Prompt de Comando, shell Linux ou Terminal
-do macOS — e entre na pasta `rewritten` deste projeto. Por exemplo:
+Open any terminal — PowerShell, Command Prompt, a Linux shell, or macOS
+Terminal — and change to this project's `rewritten` directory. For example:
 
 ```text
-cd caminho/para/rewritten
+cd path/to/rewritten
 ```
 
-Execute:
+Run:
 
 ```text
 docker compose up --build
 ```
 
-O primeiro início pode demorar porque o Docker precisa baixar a imagem
-`php:8.4-apache` e construir a aplicação. Depois, abra no navegador:
+The first start may take some time because Docker needs to download the
+`php:8.4-apache` image and build the application. Then open this address in
+your browser:
 
 ```text
 http://localhost:8081/
 ```
 
-O servidor fica publicado somente em `127.0.0.1` por padrão.
+By default, the server is published only on `127.0.0.1`.
 
-Para iniciar em segundo plano:
+To start it in the background:
 
 ```text
 docker compose up --build --detach
 ```
 
-## Parar o servidor
+## Stop the server
 
-Se o Compose estiver em primeiro plano, pressione `Ctrl+C`. Caso esteja
-executando em segundo plano, use:
+If Compose is running in the foreground, press `Ctrl+C`. If it is running in
+the background, use:
 
 ```text
 docker compose down
 ```
 
-## Desenvolvimento e reconstrução
+## Development and rebuilding
 
-As pastas `public/` e `mirror/playgta5.com/` são montadas como volumes
-somente leitura. Alterações nos arquivos públicos ficam disponíveis sem
-rebuild da imagem. Atualize a página no navegador para carregar as alterações.
+The `public/` and `mirror/playgta5.com/` directories are mounted as read-only
+volumes. Changes to public files become available without rebuilding the image.
+Refresh the browser page to load the changes.
 
-Se alterar o `Dockerfile`, o `docker-compose.yml`, o
-`apache-vhost.conf` ou o script de entrada, reconstrua e reinicie:
+If you change the `Dockerfile`, `docker-compose.yml`, `apache-vhost.conf`, or
+the entrypoint script, rebuild and restart:
 
 ```text
 docker compose up --build
 ```
 
-Para ver os logs do serviço:
+To view service logs:
 
 ```text
 docker compose logs --follow
 ```
 
-Para verificar o estado dos containers:
+To check the container status:
 
 ```text
 docker compose ps
 ```
 
-## Problemas comuns
+## Common problems
 
-### Container encerra informando que os assets estão ausentes
+### The container shows the missing-assets page
 
-Confirme que estes caminhos existem, relativos à pasta do projeto:
+Confirm that these paths exist relative to the project directory:
 
 ```text
 mirror/playgta5.com/index.html
@@ -135,42 +132,43 @@ mirror/playgta5.com/b/
 mirror/playgta5.com/data/
 ```
 
-O container valida esses itens antes de iniciar o Apache e encerra com uma
-mensagem explícita se algum estiver faltando.
+The container checks for `index.html` before starting Apache. If it is missing,
+the root URL serves `missing-mirror.html` with instructions instead of trying
+to load the game.
 
-### Porta 8081 já está em uso
+### Port 8081 is already in use
 
-Pare o processo que está usando a porta ou altere o mapeamento em
-`docker-compose.yml`. Por exemplo, para acessar pela porta `8082`:
+Stop the process using the port or change the mapping in
+`docker-compose.yml`. For example, to use port `8082`:
 
 ```yaml
 ports:
   - "127.0.0.1:8082:80"
 ```
 
-Depois, use:
+Then use:
 
 ```text
 http://localhost:8082/
 ```
 
-### O navegador mostra uma versão antiga
+### The browser shows an old version
 
-Faça uma recarga completa da página e confirme que está acessando a porta
-correta. O cache persistente dos dados do jogo é explicado em
+Perform a hard refresh and confirm that you are using the correct port. The
+persistent game-data cache is explained in
 [`docs/CLIENT-CACHE.md`](./docs/CLIENT-CACHE.md).
 
-## Remover containers e imagem
+## Removing containers and the image
 
-Para remover os containers e a rede criados pelo Compose:
+To remove the containers and network created by Compose:
 
 ```text
 docker compose down
 ```
 
-Para remover também a imagem construída localmente, liste as imagens e remova
-a correspondente ao projeto usando os comandos do Docker. Não remova a pasta
-`mirror/playgta5.com/`, pois ela é um volume local dos assets.
+To also remove the locally built image, list the images and remove the one
+corresponding to this project using Docker commands. Do not remove the
+`mirror/playgta5.com/` directory because it is the local asset volume.
 
-Para a especificação da arquitetura e dos endpoints, consulte a pasta
-[`docs/`](./docs/).
+For the architecture and endpoint specifications, see the
+[`docs/`](./docs/) directory.
